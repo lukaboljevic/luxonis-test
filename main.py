@@ -7,7 +7,7 @@ import sys
 
 
 
-host_name = "localhost"
+host_name = "0.0.0.0"
 port = 8080
 URL = "https://www.sreality.cz/en/search/for-sale/apartments"
 
@@ -52,6 +52,7 @@ class TestServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("<html><head><title>Luxonis Test</title></head>", "utf-8"))
         self.wfile.write(bytes("<body>", "utf-8"))
         self.wfile.write(bytes(self.make_output(), "utf-8"))
+        #self.wfile.write(bytes("<p> Hello world </p>", "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
 
@@ -59,10 +60,10 @@ def scrape(num_pages):
     for page in range(1, num_pages + 1):
         new_URL = f"{URL}?page={page}"
         client_response = Client(new_URL)
-    
+
         soup = BeautifulSoup(client_response.html, "html.parser")
         flats = soup.find_all("div", class_="property ng-scope")
-    
+
         for flat in flats:
             title = flat.find("span", class_="name ng-binding").text
             imgs = flat.find_all("img")
@@ -70,12 +71,13 @@ def scrape(num_pages):
             all_titles.append(title)
             all_images.append(imgs[0]["src"])  # just take first img
 
-    
+
 
 if __name__ == "__main__":
     global app
-    app = QApplication(sys.argv)    
+    app = QApplication(sys.argv)
     scrape(2)
+    print(len(all_titles), len(all_images))
     server = HTTPServer((host_name, port), TestServer)
     print("Running @ http://%s:%s" % (host_name, port))
 
